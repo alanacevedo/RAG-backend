@@ -1,33 +1,17 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
-from uuid import UUID, uuid4
-from dotenv import load_dotenv
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from app.models.file_query import FileQuery, FileQueryResponse
 import shutil
 import os 
-
-load_dotenv()
-
-app = FastAPI()
 
 DATA_DIR = os.getenv("DATA_DIR")
 
 
-class FileQuery(BaseModel):
-    filename: str
-    content_type: str
-    query: str
+router = APIRouter()
 
-class FileQueryResponse(BaseModel):
-    success: bool
-    response: str
-
-
-@app.post("/upload/", response_model=FileQueryResponse)
-async def upload_file(uploaded_file: UploadFile,
+@router.post("/file_query/", response_model=FileQueryResponse)
+async def file_query(uploaded_file: UploadFile,
                       query: str = Form(...)
 ):
-    
     # validate request
     try:
         validated_query = FileQuery(
@@ -46,8 +30,3 @@ async def upload_file(uploaded_file: UploadFile,
         "success": True,
         "response": "TestResponse"
     }
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="localhost", port=8010)

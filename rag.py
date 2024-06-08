@@ -1,6 +1,6 @@
-from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbeddings, HuggingFaceInferenceAPIEmbedding, HuggingFaceEmbedding
+from llama_index.embeddings.huggingface import HuggingFaceInferenceAPIEmbedding
 from llama_index.core.node_parser import SimpleNodeParser
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, ServiceContext, StorageContext, Settings, load_index_from_storage
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext, Settings, load_index_from_storage
 from huggingface_hub import login
 from llama_index.llms.huggingface import HuggingFaceInferenceAPI
 from dotenv import load_dotenv
@@ -24,11 +24,8 @@ embed_model = HuggingFaceInferenceAPIEmbedding(
 Settings.llm = llm
 Settings.embed_model = embed_model
 
-embeddings = embed_model.get_text_embedding("Hello World")
-print(len(embeddings))
-
 if not os.path.exists(PERSIST_DIR):
-    # create index
+    # load files
     documents = SimpleDirectoryReader("data").load_data()
 
     # parse document into nodes
@@ -37,17 +34,11 @@ if not os.path.exists(PERSIST_DIR):
     
     # storage context => vector files/database
     storage_context = StorageContext.from_defaults()
-
     index = VectorStoreIndex(nodes, storage_context=storage_context)
-
     index.storage_context.persist(persist_dir=PERSIST_DIR)
 else:
     #load index
-
-    
     storage_context = StorageContext.from_defaults(persist_dir=PERSIST_DIR)
-    
-
     index = load_index_from_storage(storage_context=storage_context)
     
 
